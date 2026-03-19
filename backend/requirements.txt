@@ -1,0 +1,8 @@
+django>=4.2,<6.1
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers
+django-filter
+pymysql
+python-dotenv
+Pillow
