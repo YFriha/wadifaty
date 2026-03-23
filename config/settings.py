@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -77,11 +78,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database — SQLite for local dev, MySQL for Docker/production
+# On Vercel, the filesystem is read-only except /tmp/
+VERCEL = os.environ.get('VERCEL', False)
+
 if os.environ.get('USE_SQLITE', 'True') == 'True':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': '/tmp/db.sqlite3' if VERCEL else BASE_DIR / 'db.sqlite3',
         }
     }
 else:
@@ -123,10 +127,11 @@ USE_TZ = True
 
 # Static and Media files
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = '/tmp/media/' if os.environ.get('VERCEL', False) else BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'

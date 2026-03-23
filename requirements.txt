@@ -6,3 +6,5 @@ django-filter
 pymysql
 python-dotenv
 Pillow
+whitenoise
+gunicorn
