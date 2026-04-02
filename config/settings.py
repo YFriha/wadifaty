@@ -76,8 +76,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 _raw_db_url = os.environ.get('DATABASE_URL', '')
 
 if _raw_db_url:
-    # Strip sslmode from URL — psycopg2 needs it via OPTIONS, not the connection string
-    _clean_url = _raw_db_url.replace('?sslmode=require', '').replace('&sslmode=require', '')
+    # Strip query params like sslmode from URL — psycopg2 needs it via OPTIONS, not the connection string
+    _clean_url = _raw_db_url.split('?')[0]
     DATABASES = {
         'default': dj_database_url.parse(
             _clean_url,
