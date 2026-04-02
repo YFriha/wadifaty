@@ -129,8 +129,17 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Ensure CVs/PDFs are stored using Cloudinary instead of Vercel's ephemeral filesystem
-if os.environ.get('CLOUDINARY_URL'):
+# Cloudinary storage for resumes — works on Vercel (no persistent filesystem)
+_cloudinary_url = os.environ.get('CLOUDINARY_URL', '')
+if _cloudinary_url:
+    import re as _re
+    _m = _re.match(r'cloudinary://(\d+):([^@]+)@(.+)', _cloudinary_url)
+    if _m:
+        CLOUDINARY_STORAGE = {
+            'CLOUD_NAME': _m.group(3),
+            'API_KEY': _m.group(1),
+            'API_SECRET': _m.group(2),
+        }
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
 else:
     MEDIA_ROOT = '/tmp/media/' if os.environ.get('VERCEL') else BASE_DIR / 'media'
