@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'django_filters',
+    'cloudinary_storage',
+    'cloudinary',
     
     # Local apps
     'accounts',
@@ -125,7 +127,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/tmp/media/' if os.environ.get('VERCEL') else BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Ensure CVs/PDFs are stored using Cloudinary instead of Vercel's ephemeral filesystem
+if os.environ.get('CLOUDINARY_URL'):
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
+else:
+    MEDIA_ROOT = '/tmp/media/' if os.environ.get('VERCEL') else BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'

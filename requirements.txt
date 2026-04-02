@@ -9,3 +9,5 @@ python-dotenv
 Pillow
 whitenoise
 gunicorn
+cloudinary
+django-cloudinary-storage
