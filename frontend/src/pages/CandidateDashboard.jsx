@@ -13,8 +13,7 @@ export default function CandidateDashboard() {
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/';
-                const response = await axiosInstance.get(`${baseURL}applications/`);
+                const response = await axiosInstance.get('applications/');
                 setApplications(response.data.results || response.data);
             } catch (error) {
                 console.error("Error fetching applications", error);
