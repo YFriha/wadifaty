@@ -3,7 +3,8 @@ djangorestframework
 djangorestframework-simplejwt
 django-cors-headers
 django-filter
-pymysql
+psycopg2-binary
+dj-database-url
 python-dotenv
 Pillow
 whitenoise

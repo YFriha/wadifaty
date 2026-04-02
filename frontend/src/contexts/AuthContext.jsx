@@ -1,13 +1,11 @@
 import { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import axios from 'axios';
+import axiosInstance from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export default AuthContext;
-
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/';
 
 // Helper: decode access token into a user object
 const decodeToken = (tokens) => {
@@ -45,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     const loginUser = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`${BASE_URL}auth/login/`, {
+            const response = await axiosInstance.post('auth/login/', {
                 username: e.target.username.value,
                 password: e.target.password.value,
             });
@@ -72,11 +70,11 @@ export const AuthProvider = ({ children }) => {
 
     const registerUser = async (formData) => {
         // 1. Register
-        const response = await axios.post(`${BASE_URL}auth/register/`, formData);
+        const response = await axiosInstance.post('auth/register/', formData);
         if (response.status !== 201) throw new Error('Registration failed');
 
         // 2. Auto-login after register
-        const loginResponse = await axios.post(`${BASE_URL}auth/login/`, {
+        const loginResponse = await axiosInstance.post('auth/login/', {
             username: formData.username,
             password: formData.password,
         });

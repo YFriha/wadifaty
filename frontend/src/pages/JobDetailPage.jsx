@@ -1,25 +1,26 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '../api/axios';
 import AuthContext from '../contexts/AuthContext';
 import { Building2, MapPin, DollarSign, Clock, ArrowLeft, Send } from 'lucide-react';
+import ApplyModal from '../components/ApplyModal';
+
 
 export default function JobDetailPage() {
     const { id } = useParams();
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchJob = async () => {
-             const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/';
             try {
-                const response = await axios.get(`${baseURL}jobs/${id}/`);
+                const response = await axiosInstance.get(`jobs/${id}/`);
                 setJob(response.data);
             } catch (error) {
                 console.error("Error fetching job:", error);
-                // Handle 404
             } finally {
                 setLoading(false);
             }
@@ -138,18 +139,23 @@ export default function JobDetailPage() {
                                     <ArrowLeft className="w-5 h-5 ml-2 group-hover:translate-x-1 rotate-180 transition-transform" />
                                 </Link>
                             ) : user.role === 'candidate' ? (
-                                <Link 
-                                    to={`/apply/${job.id}`}
+                                <button
+                                    onClick={() => setShowModal(true)}
                                     className="inline-flex items-center justify-center px-10 py-4 text-base font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-xl shadow-indigo-200 hover:-translate-y-1 transition-all hover:scale-105 active:scale-95 group"
                                 >
                                     Apply for this Position
                                     <Send className="w-5 h-5 ml-2.5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                </Link>
+                                </button>
                             ) : null}
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Apply Modal */}
+            {showModal && job && (
+                <ApplyModal job={job} onClose={() => setShowModal(false)} />
+            )}
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axios';
 import { Search, MapPin } from 'lucide-react';
 import JobCard from '../components/JobCard';
 
@@ -15,14 +15,13 @@ export default function JobListPage() {
     const fetchJobs = async () => {
         setLoading(true);
         try {
-            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/';
-            let url = `${baseURL}jobs/?page=${page}`;
+            let url = `jobs/?page=${page}`;
             if (searchQuery) url += `&search=${searchQuery}`;
             if (locationFilter) url += `&location=${locationFilter}`;
             
-            const response = await axios.get(url);
+            const response = await axiosInstance.get(url);
             setJobs(response.data.results);
-            setTotalPages(Math.ceil(response.data.count / 10)); // Assuming PAGE_SIZE = 10
+            setTotalPages(Math.ceil(response.data.count / 10));
         } catch (err) {
             setError('Failed to load jobs. Please try again later.');
             console.error(err);

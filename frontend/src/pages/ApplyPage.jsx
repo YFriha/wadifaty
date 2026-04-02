@@ -15,9 +15,8 @@ export default function ApplyPage() {
 
     useEffect(() => {
         const fetchJob = async () => {
-            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/';
             try {
-                const response = await axiosInstance.get(`${baseURL}jobs/${id}/`);
+                const response = await axiosInstance.get(`jobs/${id}/`);
                 setJob(response.data);
             } catch (err) {
                 setError("Could not load job details.");
@@ -42,8 +41,7 @@ export default function ApplyPage() {
         }
 
         try {
-            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/';
-            await axiosInstance.post(`${baseURL}applications/apply/`, formData, {
+            await axiosInstance.post(`applications/apply/`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

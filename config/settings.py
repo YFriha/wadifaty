@@ -1,13 +1,8 @@
 import os
-import pymysql
-pymysql.install_as_MySQLdb()
-# Django 6 requires mysqlclient >= 2.2.1 but pymysql reports 1.4.6.
-# Patch the version so Django's startup check passes.
-pymysql.version_info = (2, 2, 1, "final", 0)
-import MySQLdb
-MySQLdb.version_info = (2, 2, 1, "final", 0)
 from pathlib import Path
 from datetime import timedelta
+
+import dj_database_url
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -77,28 +72,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database — SQLite for local dev, MySQL for Docker/production
-# On Vercel, the filesystem is read-only except /tmp/
-VERCEL = os.environ.get('VERCEL', False)
-
-if os.environ.get('USE_SQLITE', 'True') == 'True':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': '/tmp/db.sqlite3' if VERCEL else BASE_DIR / 'db.sqlite3',
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('DB_NAME', 'wadifaty'),
-            'USER': os.environ.get('DB_USER', 'root'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-            'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-            'PORT': os.environ.get('DB_PORT', '3306'),
-        }
-    }
+# Database — Neon PostgreSQL via DATABASE_URL, fallback to SQLite for local dev
+DATABASES = {
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=True,
+    )
+}
 
 
 # Password validation
@@ -131,7 +113,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/tmp/media/' if os.environ.get('VERCEL', False) else BASE_DIR / 'media'
+MEDIA_ROOT = '/tmp/media/' if os.environ.get('VERCEL') else BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
@@ -157,3 +139,11 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# Trust Vercel domains + localhost for CSRF
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://localhost:8000',
+    'https://*.vercel.app',
+]
