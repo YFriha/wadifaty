@@ -73,13 +73,26 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database — Neon PostgreSQL via DATABASE_URL, fallback to SQLite for local dev
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+_raw_db_url = os.environ.get('DATABASE_URL', '')
+
+if _raw_db_url:
+    # Strip sslmode from URL — psycopg2 needs it via OPTIONS, not the connection string
+    _clean_url = _raw_db_url.replace('?sslmode=require', '').replace('&sslmode=require', '')
+    DATABASES = {
+        'default': dj_database_url.parse(
+            _clean_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
